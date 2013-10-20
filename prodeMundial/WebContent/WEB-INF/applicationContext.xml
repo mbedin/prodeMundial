@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="
+    http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+    http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+    http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+
+    <bean
+        class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor" />
+
+	<bean id="clienteService" class="com.biogenesisbago.prode.service.ClienteServiceImpl" />
+	<bean id="equipoService" class="com.biogenesisbago.prode.service.EquipoServiceImpl" />
+	<bean id="grupoService" class="com.biogenesisbago.prode.service.GrupoServiceImpl" />
+	<bean id="preguntaService" class="com.biogenesisbago.prode.service.PreguntaServiceImpl" />
+	<bean id="respuestaClienteService" class="com.biogenesisbago.prode.service.RespuestaClienteServiceImpl" />
+	<bean id="respuestaService" class="com.biogenesisbago.prode.service.RespuestaServiceImpl" />
+	<bean id="tarjetaService" class="com.biogenesisbago.prode.service.TarjetaServiceImpl" />
+	<bean id="usuarioService" class="com.biogenesisbago.prode.service.UsuarioServiceImpl" />
+	<bean id="parametroService" class="com.biogenesisbago.prode.service.ParametroServiceImpl" />
+	<bean id="promocionService" class="com.biogenesisbago.prode.service.PromocionServiceImpl" />
+	<bean id="pronosticoPartidoService" class="com.biogenesisbago.prode.service.PronosticoPartidoServiceImpl" />
+	<bean id="provinciaService" class="com.biogenesisbago.prode.service.ProvinciaServiceImpl" />
+	<bean id="partidoService" class="com.biogenesisbago.prode.service.PartidoServiceImpl" />
+    <bean id="sedeService" class="com.biogenesisbago.prode.service.SedeServiceImpl" />
+	<bean id="faseService" class="com.biogenesisbago.prode.service.FaseServiceImpl" />
+    
+    <bean id="entityManagerFactory"
+        class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <property name="jpaVendorAdapter">
+            <bean
+                class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+                <property name="database" value="MYSQL" />
+                <property name="showSql" value="false" />
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="dataSource"
+        class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver" />
+        <property name="url" value="jdbc:mysql://localhost:3306/prode_mundial_empleados" />
+        <property name="username" value="ggold" />
+        <property name="password" value="ggoldprode123" />
+    </bean>
+
+    <bean id="transactionManager"
+        class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactory" />
+    </bean>
+
+    <tx:annotation-driven transaction-manager="transactionManager" />
+
+    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">  
+		<property name="ignoreUnresolvablePlaceholders">  
+			<value>true</value>  
+		</property>  
+		<property name="locations"> 
+			<list>  
+				<value>classpath:mail.properties</value>  
+			</list>  
+		</property>  
+	</bean>  
+
+	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">  
+		<property name="defaultEncoding" value="UTF-8"/>
+		<property name="host" value="${mail.host}"/>
+		<property name="port" value="${mail.port}"/>
+		<property name="protocol" value="${mail.protocol}"/>
+		<property name="username" value="${mail.username}"/>
+		<property name="password" value="${mail.password}"/>
+		<property name="javaMailProperties">
+		  <props>
+		    <prop key="mail.debug">${mail.debug}</prop>
+		    <prop key="mail.${mail.protocol}.auth">${mail.smtp-auth}</prop>
+		    <prop key="mail.from">${mail.from}</prop>
+		  </props>
+		</property>
+	</bean>  
+  
+	<bean id="mailService" class="com.biogenesisbago.prode.service.MailServiceImpl">  
+		<property name="active" value="true"/>  
+		<property name="mailSender" ref="mailSender"/>  
+		<property name="from" value="${mail.from}"/>  
+		<property name="bcc" value="${mail.bcc}"/>
+	</bean>  
+	
+	<!--  Site Publico -->
+	
+	<bean id="loginAction" scope="prototype"
+        class="com.biogenesisbago.prode.action.LoginAction">
+        <constructor-arg ref="clienteService" />
+    </bean>
+
+	<bean id="passwordAction" scope="prototype"
+        class="com.biogenesisbago.prode.action.PasswordAction">
+        <constructor-arg ref="clienteService" />
+        <constructor-arg ref="mailService" />
+    </bean>
+
+	<bean id="principalAction" scope="prototype"
+        class="com.biogenesisbago.prode.action.PrincipalAction">
+        <constructor-arg ref="clienteService" />
+    </bean>
+
+	<bean id="comoJugarAction" scope="prototype"
+        class="com.biogenesisbago.prode.action.ComoJugarAction">
+        <constructor-arg ref="clienteService" />
+    </bean>
+
+	<bean id="tarjetasPorJugarAction" scope="prototype"
+        class="com.biogenesisbago.prode.action.TarjetasPorJugarAction">
+        <constructor-arg ref="tarjetaService" />
+    </bean>
+
+	<bean id="tarjetaAction" scope="prototype"
+        class="com.biogenesisbago.prode.action.TarjetaAction">
+		<constructor-arg ref="equipoService" />
+        <constructor-arg ref="tarjetaService" />
+        <constructor-arg ref="provinciaService" />
+        <constructor-arg ref="parametroService" />
+    </bean>
+    
+    <bean id="tarjeta8Action" scope="prototype"
+        class="com.biogenesisbago.prode.action.Tarjeta8Action">
+		<constructor-arg ref="equipoService" />
+        <constructor-arg ref="tarjetaService" />
+        <constructor-arg ref="provinciaService" />
+        <constructor-arg ref="parametroService" />
+    </bean>
+    
+    <bean id="triviaAction" scope="prototype"
+        class="com.biogenesisbago.prode.action.TriviaAction">
+        <constructor-arg ref="preguntaService" />
+        <constructor-arg ref="respuestaClienteService" />
+        <constructor-arg ref="respuestaService" />
+        <constructor-arg ref="clienteService" />
+    </bean>
+    
+	<bean id="tarjetasJugadasAction" scope="prototype"
+        class="com.biogenesisbago.prode.action.TarjetasJugadasAction">
+        <constructor-arg ref="tarjetaService" />
+    </bean>
+
+	<bean id="tarjetasExtrasAction" scope="prototype"
+        class="com.biogenesisbago.prode.action.TarjetasExtrasAction">
+        <constructor-arg ref="promocionService" />
+    </bean>
+    
+        
+    <!--  Site Admin -->
+    <bean id="loginAdminAction" scope="prototype"
+        class="com.biogenesisbago.prode.action.admin.LoginAction">
+        <constructor-arg ref="usuarioService" />
+    </bean>
+    
+    <bean id="menuAction" scope="prototype"
+        class="com.biogenesisbago.prode.action.admin.MenuAction">
+        <constructor-arg ref="usuarioService" />
+    </bean>
+    
+    <bean id="tarjetasNuevasAction" scope="prototype"
+        class="com.biogenesisbago.prode.action.admin.TarjetasNuevasAction">
+        <constructor-arg ref="usuarioService" />
+        <constructor-arg ref="clienteService" />
+        <constructor-arg ref="tarjetaService" />
+        <constructor-arg ref="mailService" />
+    </bean>
+    
+    <bean id="tarjetasProductorAction" scope="prototype"
+        class="com.biogenesisbago.prode.action.admin.TarjetasProductorAction">
+        <constructor-arg ref="usuarioService" />
+        <constructor-arg ref="clienteService" />
+        <constructor-arg ref="tarjetaService" />
+        <constructor-arg ref="mailService" />
+    </bean>
+    
+	<bean id="promocionAction" scope="prototype"
+        class="com.biogenesisbago.prode.action.admin.PromocionAction">
+        <constructor-arg ref="promocionService" />
+        <constructor-arg ref="mailService" />
+    </bean>
+    
+        <bean id="preguntaAction" scope="prototype"
+        class="com.biogenesisbago.prode.action.admin.PreguntaAction">
+        <constructor-arg ref="preguntaService" />
+        <constructor-arg ref="respuestaService" />
+    </bean>
+    
+    <bean id="partidoAction" scope="prototype"
+        class="com.biogenesisbago.prode.action.admin.PartidoAction">
+        <constructor-arg ref="partidoService" />
+        <constructor-arg ref="tarjetaService" />
+        <constructor-arg ref="equipoService" />
+        <constructor-arg ref="sedeService" />
+        <constructor-arg ref="faseService" />
+        <constructor-arg ref="pronosticoPartidoService" />
+    </bean>
+    
+    <bean id="gruposPrimeraFaseAction" scope="prototype"
+        class="com.biogenesisbago.prode.action.admin.GruposPrimeraFaseAction">
+        <constructor-arg ref="grupoService" />
+        <constructor-arg ref="equipoService" />
+        <constructor-arg ref="tarjetaService" />
+    </bean>
+
+    <bean id="reportesClientesAction" scope="prototype"
+        class="com.biogenesisbago.prode.action.admin.ReportesClientesAction">
+        <constructor-arg ref="clienteService" />
+        <constructor-arg ref="mailService" />
+        <constructor-arg ref="tarjetaService" />
+    </bean>    
+</beans>
